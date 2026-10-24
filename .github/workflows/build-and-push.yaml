@@ -1,0 +1,88 @@
+name: build-and-push
+
+# PR to main    -> verify (tsc, lint, prettier, tests) + build image (no push)
+# merge to main -> verify + build + push image :<short-sha> + open PR on gitops bumping the tag
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: docker.io/${{ vars.DOCKERHUB_USERNAME }}/platform-idp
+  # GITOPS_REPO: ${{ github.repository_owner }}/gitops
+  # GITOPS_VALUES: platform/backstage/values.yaml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn tsc
+      - run: yarn lint:all
+      - run: yarn prettier:check
+      - run: yarn test:all
+
+  image:
+    needs: verify
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.event_name == 'push'
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # deploy-pr:
+  #   needs: image
+  #   if: github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     TAG: ${{ needs.image.outputs.tag }}
+  #     GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         repository: ${{ env.GITOPS_REPO }}
+  #         token: ${{ secrets.GITOPS_TOKEN }}
+  #     - name: Open PR bumping the Backstage image tag
+  #       run: |
+  #         BRANCH="backstage-${TAG}"
+  #         git checkout -b "$BRANCH"
+  #         yq -i '.backstage.image.tag = strenv(TAG)' "$GITOPS_VALUES"
+  #         git config user.name "ci-bot"
+  #         git config user.email "ci-bot@users.noreply.github.com"
+  #         git commit -am "backstage: deploy ${TAG}"
+  #         git push -u origin "$BRANCH"
+  #         gh pr create --repo "$GITOPS_REPO" --base main --head "$BRANCH" \
+  #           --title "backstage: deploy ${TAG}" \
+  #           --body "Image \`${IMAGE}:${TAG}\` from ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
