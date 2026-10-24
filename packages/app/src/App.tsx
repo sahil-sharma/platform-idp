@@ -50,17 +50,18 @@ const keycloakAuthApi = ApiBlueprint.make({
 
 const signInPage = SignInPageBlueprint.make({
   params: {
-    loader: async () => props => (
-      <SignInPage
-        {...props}
-        provider={{
-          id: 'keycloak-auth-provider',
-          title: 'Keycloak',
-          message: 'Sign in using Keycloak',
-          apiRef: keycloakAuthApiRef,
-        }}
-      />
-    ),
+    loader: async () => props =>
+      (
+        <SignInPage
+          {...props}
+          provider={{
+            id: 'keycloak-auth-provider',
+            title: 'Keycloak',
+            message: 'Sign in using Keycloak',
+            apiRef: keycloakAuthApiRef,
+          }}
+        />
+      ),
   },
 });
 

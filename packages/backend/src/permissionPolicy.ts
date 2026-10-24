@@ -21,7 +21,14 @@ import {
 import { catalogEntityReadPermission } from '@backstage/plugin-catalog-common/alpha';
 
 const ADMIN_GROUP = 'group:default/platform-team';
-const SHARED_KINDS = ['Group', 'User', 'System', 'Domain', 'Template', 'Location'];
+const SHARED_KINDS = [
+  'Group',
+  'User',
+  'System',
+  'Domain',
+  'Template',
+  'Location',
+];
 
 class OwnershipPolicy implements PermissionPolicy {
   async handle(

@@ -28,7 +28,9 @@ backend.add(
   import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
 );
 backend.add(import('@backstage/plugin-catalog-backend-module-logs'));
-backend.add(import('@backstage-community/plugin-catalog-backend-module-keycloak')); // IdP demo: users + groups from Keycloak
+backend.add(
+  import('@backstage-community/plugin-catalog-backend-module-keycloak'),
+); // IdP demo: users + groups from Keycloak
 
 // permission plugin
 backend.add(import('@backstage/plugin-permission-backend'));
