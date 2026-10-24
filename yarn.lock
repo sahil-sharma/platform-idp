@@ -15197,6 +15197,7 @@ __metadata:
   dependencies:
     "@backstage-community/plugin-github-actions": "npm:^1.5.1"
     "@backstage-community/plugin-vault": "npm:^0.25.0"
+    "@backstage/backend-plugin-api": "npm:^1.11.0"
     "@backstage/cli": "npm:^0.36.6"
     "@backstage/core-app-api": "npm:^1.20.6"
     "@backstage/core-components": "npm:^0.18.15"
