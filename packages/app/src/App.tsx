@@ -53,7 +53,6 @@ const signInPage = SignInPageBlueprint.make({
       <SignInPage
         {...props}
         providers={[
-          //'guest',
           {
             id: 'keycloak-auth-provider',
             title: 'Keycloak',
