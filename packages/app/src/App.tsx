@@ -1,25 +1,25 @@
 import { createApp } from '@backstage/frontend-defaults';
 import catalogPlugin from '@backstage/plugin-catalog/alpha';
-import { navModule } from './modules/nav';
 import { homeModule } from './modules/home';
+import { navModule } from './modules/nav';
 
 import { OAuth2 } from '@backstage/core-app-api';
+import { SignInPage } from '@backstage/core-components';
 import {
+  BackstageIdentityApi,
   OpenIdConnectApi,
   ProfileInfoApi,
-  BackstageIdentityApi,
   SessionApi,
 } from '@backstage/core-plugin-api';
-import { SignInPage } from '@backstage/core-components';
-import { SignInPageBlueprint } from '@backstage/plugin-app-react';
 import {
-  createApiRef,
-  createFrontendModule,
   ApiBlueprint,
   configApiRef,
+  createApiRef,
+  createFrontendModule,
   discoveryApiRef,
   oauthRequestApiRef,
 } from '@backstage/frontend-plugin-api';
+import { SignInPageBlueprint } from '@backstage/plugin-app-react';
 
 const keycloakAuthApiRef = createApiRef<
   OpenIdConnectApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
@@ -53,7 +53,7 @@ const signInPage = SignInPageBlueprint.make({
       <SignInPage
         {...props}
         providers={[
-          'guest',
+          //'guest',
           {
             id: 'keycloak-auth-provider',
             title: 'Keycloak',
