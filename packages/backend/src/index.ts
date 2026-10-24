@@ -70,7 +70,9 @@ backend.add(import('@backstage/plugin-signals-backend'));
 backend.add(import('@backstage/plugin-mcp-actions-backend'));
 
 backend.add(import('@backstage/plugin-auth-backend-module-oidc-provider'));
-backend.add(import('@backstage-community/plugin-catalog-backend-module-keycloak'));
+backend.add(
+  import('@backstage-community/plugin-catalog-backend-module-keycloak'),
+);
 backend.add(import('@roadiehq/backstage-plugin-argo-cd-backend'));
 
 backend.start();
