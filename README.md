@@ -2,6 +2,8 @@
 
 This repository contains the source code, custom plugins, backend integrations, and container deployment scripts for our enterprise **Backstage Internal Developer Portal (IDP)**.
 
+> Note: This repo has GitHub Action workflow that automatically build and push docker image from main branch.
+
 ---
 
 ## Prerequisites
@@ -56,9 +58,7 @@ With the bundle artifacts prepared in your workspace root, run the Docker build 
 
 ```bash
 DOCKER_BUILDKIT=1 docker build \
-  -t <dockerhub-username><docker-repo>/:<image-tag> .
+  -t <dockerhub-username>/<docker-repo>:<image-tag> .
 
-docker push <dockerhub-username><docker-repo>/:<image-tag>
+docker push <dockerhub-username>/<docker-repo>:<image-tag>
 ```
-
-This repo has
