@@ -29,14 +29,15 @@ RUN mkdir packages/backend/dist/skeleton packages/backend/dist/bundle \
 FROM node:22-bookworm-slim
 ENV PYTHON=/usr/bin/python3
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3 python3-venv g++ build-essential libsqlite3-dev \
+    && apt-get install -y --no-install-recommends python3 python3-venv g++ build-essential libsqlite3-dev python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# TechDocs: mkdocs for builder=local, generator.runIn=local
+# TechDocs: mkdocs for techdocs.builder=local
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN pip install --no-cache-dir mkdocs-techdocs-core
+RUN pip install --no-cache-dir --upgrade pip setuptools \
+    && pip install --no-cache-dir mkdocs-techdocs-core
 
 USER node
 WORKDIR /app
@@ -44,11 +45,12 @@ COPY --from=build --chown=node:node /app/.yarn ./.yarn
 COPY --from=build --chown=node:node /app/.yarnrc.yml /app/backstage.json ./
 COPY --from=build --chown=node:node /app/yarn.lock /app/package.json /app/packages/backend/dist/skeleton/ ./
 RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
-    yarn workspaces focus --all --production && rm -rf "$(yarn cache clean)"
+    yarn workspaces focus --all --production && yarn cache clean
 COPY --from=build --chown=node:node /app/packages/backend/dist/bundle/ ./
-COPY --chown=node:node app-config*.yaml ./
+# COPY --chown=node:node app-config*.yaml instrumentation.js ./
 
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--no-node-snapshot"
-EXPOSE 7007
-CMD ["node", "packages/backend", "--config", "app-config.yaml"]
+EXPOSE 7007 9464
+CMD ["node", "packages/backend"]
+# CMD ["node", "--require", "./instrumentation.js", "packages/backend", "--config", "app-config.yaml"]
